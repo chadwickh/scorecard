@@ -45,21 +45,15 @@ if (Meteor.isClient) {
   Meteor.subscribe("participants");
   
   Router.map(function() {
-    this.route('Home', { path: '/', template: 'participants_template', data: {participant:  Participants.find()}});
+    this.route('Home', { path: '/', template: 'scoreboard', data: {participant:  Participants.find({},{sort: {Eligible: 1, Points: -1, Achievement_count: -1, LastName: 1, FirstName: 1}})}});
+    this.route('Scoreboard', { path: '/Scoreboard', template: 'scoreboard', data: {participant:  Participants.find({},{sort: {Eligible: 1, Points: -1, Achievement_count: -1, LastName: 1, FirstName: 1}})}});
     this.route('Participants', { path: '/Participants', template: 'participants_template', data: {participant:  Participants.find()}});
     this.route('Achivements', { path: '/Achievements', template: 'achievements_template', data: {achievement:  Achievements.find()}});
     this.route('Inspect', { 
       path: '/Inspect/:_id', 
       template: 'inspect_template', 
       data: function() {
-        return  Participants.findOne({_id: this.params._id})
-      },
-      onBeforeAction: function() {
-        if (!Meteor.user() || !Roles.userIsInRole(Meteor.user(),['admin'])) {
-          this.render('denied');
-        } else {
-          this.next();
-        }
+        return  {participant: Participants.findOne({_id: this.params._id})}
       }
     });
     this.route('ParticipantsAutoform', {
@@ -114,6 +108,9 @@ if (Meteor.isClient) {
     });
     this.route('ModifyParticipant', { 
       path: '/Modify/Participant/:_id', 
+      waitOn: function() {
+        return Meteor.subscribe("achievements");
+      },
       template: 'modify_participanttemplate', 
       data: function() {
         return {
@@ -170,10 +167,12 @@ if (Meteor.isClient) {
       //console.log(participant);
       var achievement=Achievements.findOne({_id : achievement_id});
       //console.log(achievement);
-      //var tmp=Achievements.findOne({_id: achievement_id});
-      //var achievement_category=tmp.Category;
-      //var category_field=achievement_category+"count";
-      //console.log(achievement_category, category_field);
+      var tmp=Achievements.findOne({_id: achievement_id});
+      var achievement_category=tmp.Category;
+      var category_field=achievement_category+"_count";
+      console.log("--- achievement category, category_field ---");
+      console.log(achievement_category, category_field);
+      console.log("---------------------------------------------");
 
       if (typeof participant.Achievements === 'undefined') {
          console.log('First Achievement!');
@@ -182,12 +181,12 @@ if (Meteor.isClient) {
       } else {
          console.log("Existing Achievements!");
          // Walk through the achievements collection building a hash of existing categories
-         var achievements = Achievements.find().fetch();
+         var achievement_list = Achievements.find().fetch();
          var categories = [];
-         //console.log(achievements);
-         for (var i=0; i < achievements.length; i++) {
-           //console.log(achievements[i]);
-           categories[achievements[i].Category]=0;
+         //console.log(achievement_list);
+         for (var i=0; i < achievement_list.length; i++) {
+           //console.log(achievement_list[i]);
+           categories[achievement_list[i].Category]=0;
          }
          //console.log(categories);
          // The following loop does two things
@@ -228,9 +227,68 @@ if (Meteor.isClient) {
 
          //console.log(participant.Achievements);
       }
-      //Participants.update({_id: participant_id},{$inc: {Achievement_count: 1}});
-      //Participants.update({_id: participant_id},{$inc: {category_field: 1}});
-       
+      // Update count of total achievements as well as per-category achievements (used for trophies)
+      Participants.update({_id: participant_id},{$inc: {Achievement_count: 1}});
+      var inc = {};
+      inc[category_field]=1;
+      console.log(inc);
+      modify={};
+      modify["$inc"]=inc; 
+      console.log(modify);
+      Participants.update({_id: participant_id},modify);
+      // Assign/deassign trophies
+      Meteor.call("reset_trophies");
+      var medalists=Participants.find({Eligible: true},{sort: {Points: -1, Achievement_count: -1},limit: 3}).fetch();
+      console.log("------  Medalists ------------");
+      console.log(medalists)
+      console.log("------------------------------");
+      switch (medalists.length-1) {
+        case(2):
+          Participants.update({_id: medalists[2]._id},{$addToSet: {Trophies: {Name: "ThirdPlace", Tooltip: "Third Place", Image: "/images/Circled_3-24.png"}}});
+          Participants.update({_id: medalists[1]._id},{$addToSet: {Trophies: {Name: "SecondPlace", Tooltip: "Second Place", Image: "/images/Circled_2-24.png"}}});
+          Participants.update({_id: medalists[0]._id},{$addToSet: {Trophies: {Name: "FirstPlace", Tooltip: "First Place", Image: "/images/Circled_1-24.png"}}});
+          break;
+        case(1):
+          Participants.update({_id: medalists[1]._id},{$addToSet: {Trophies: {Name: "SecondPlace", Tooltip: "Second Place", Image: "/images/Circled_2-24.png"}}});
+          Participants.update({_id: medalists[0]._id},{$addToSet: {Trophies: {Name: "FirstPlace", Tooltip: "First Place", Image: "/images/Circled_1-24.png"}}});
+        case(0):
+          Participants.update({_id: medalists[0]._id},{$addToSet: {Trophies: {Name: "FirstPlace", Tooltip: "First Place", Image: "/images/Circled_1-24.png"}}});
+          break;
+        default:
+          break;
+      };
+      //Trophy for most achievements
+      var mostAchievements=Participants.findOne({Achievement_count: {$gt: 0}},{sort: {Achievement_count: -1}, limit: 1});
+      console.log(mostAchievements, mostAchievements._id);
+      if (typeof mostAchievements !== "undefined") {
+        Participants.update({_id: mostAchievements._id},{$addToSet: {Trophies: {Name : "MostAchievements", Tooltip: "Most completed achievements", Image: "/images/Championship_Belt-24.png"}}});
+      }
+      //Trophy for most delivery achievements
+      var mostDelivery=Participants.findOne({Delivery_count: {$gt: 0}},{sort: {Delivery_count: -1}, limit: 1});
+      if (typeof mostDelivery !== "undefined") {
+        Participants.update({_id: mostDelivery._id},{$addToSet: {Trophies: {Name : "MostDelivery", Tooltip: "Most completed achievements in the delivery category", Image: "/images/Truck-24.png"}}});
+      }
+      //Trophy for most marketing achievements
+      var mostMarketing=Participants.findOne({Marketing_count: {$gt: 0}},{sort: {Marketing_count: -1}, limit: 1});
+      if (typeof mostMarketing !== "undefined") {
+        Participants.update({_id: mostMarketing._id},{$addToSet: {Trophies: {Name : "MostMarketing", Tooltip: "Most completed achievements in the marketing category", Image: "/images/Advertising-24.png"}}});
+      } 
+      //Trophy for most Partner achievements
+      var mostPartner=Participants.findOne({Partner_count: {$gt: 0}},{sort: {Partner_count: -1}, limit: 1});
+      if (typeof mostPartner !== "undefined") {
+        Participants.update({_id: mostPartner._id},{$addToSet: {Trophies: {Name : "MostPartner", Tooltip: "Most completed achievements in the partner category", Image: "/images/Helping_Hand-24.png"}}});
+      }
+      //Trophy for most Practice achievements
+      var mostPractice=Participants.findOne({Practice_count: {$gt: 0}},{sort: {Practice_count: -1}, limit: 1});
+      if (typeof mostPractice !== "undefined") {
+        Participants.update({_id: mostPractice._id},{$addToSet: {Trophies: {Name : "MostPractice", Tooltip: "Most completed achievements in the practice category", Image: "/images/Piano-24.png"}}});
+      }
+      //Trophy for most Sales achievements
+      var mostSales=Participants.findOne({Sales_count: {$gt: 0}},{sort: {Sales_count: -1}, limit: 1});
+      if (typeof mostSales !== "undefined") {
+        Participants.update({_id: mostSales._id},{$addToSet: {Trophies: {Name : "MostSales", Tooltip: "Most completed achievements in the sales category", Image: "/images/Sales_Performance-24.png"}}});
+      }
+
       // Redirect back to the scoreboard after submit
       Router.go('/');     
     }
@@ -245,12 +303,27 @@ if (Meteor.isServer) {
     // code to run on server at startup
   });
 
+  Meteor.methods({
+    reset_trophies: function() {
+      Participants.update({"Trophies.Name": "FirstPlace"}, {$pull: {Trophies: {"Name" : "FirstPlace"}}})
+      Participants.update({"Trophies.Name": "SecondPlace"}, {$pull: {Trophies: {"Name" : "SecondPlace"}}})
+      Participants.update({"Trophies.Name": "ThirdPlace"}, {$pull: {Trophies: {"Name" : "ThirdPlace"}}})
+      Participants.update({"Trophies.Name": "MostAchievements"}, {$pull: {Trophies: {"Name" : "MostAchievements"}}})
+      Participants.update({"Trophies.Name": "MostDelivery"}, {$pull: {Trophies: {"Name" : "MostDelivery"}}})
+      Participants.update({"Trophies.Name": "MostMarketing"}, {$pull: {Trophies: {"Name" : "MostMarketing"}}})
+      Participants.update({"Trophies.Name": "MostPartner"}, {$pull: {Trophies: {"Name" : "MostPartner"}}})
+      Participants.update({"Trophies.Name": "MostPractice"}, {$pull: {Trophies: {"Name" : "MostPractice"}}})
+      Participants.update({"Trophies.Name": "MostSales"}, {$pull: {Trophies: {"Name" : "MostSales"}}})
+    }
+  });
+      
+
   Meteor.publish("participants", function() {
     return Participants.find({});
   });
 
   Meteor.publish("achievements", function() {
-    return Participants.find({});
+    return Achievements.find({});
   });
 
   Achievements.allow({

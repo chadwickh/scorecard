@@ -25,36 +25,36 @@ Participants.attachSchema( new SimpleSchema ({
     type: Boolean,
     label: "Met prerequisites for award",
   },
-  //Achievement_count: {
-    //type: Number,
-    //label: "Total number of achievements accumulated",
-    //defaultValue: 0
-  //},
-  //Delivery_count: {
-    //type: Number,
-    //label: "Total number of delivery achievements accumulated",
-    //defaultValue: 0
-  //},
-  //Marketing_count: {
-    //type: Number,
-    //label: "Total number of marketing achievements accumulated",
-    //defaultValue: 0
-  //},
-  //Partner_count: {
-    //type: Number,
-    //label: "Total number of partner achievements accumulated",
-    //defaultValue: 0
-  //},
-  //Practice_count: {
-    //type: Number,
-    //label: "Total number of practice achievements accumulated",
-    //defaultValue: 0
-  //},
-  //Sales_count: {
-    //type: Number,
-    //label: "Total number of sales achievements accumulated",
-    //defaultValue: 0
-  //},
+  Achievement_count: {
+    type: Number,
+    label: "Total number of achievements accumulated",
+    defaultValue: 0
+  },
+  Delivery_count: {
+    type: Number,
+    label: "Total number of delivery achievements accumulated",
+    defaultValue: 0
+  },
+  Marketing_count: {
+    type: Number,
+    label: "Total number of marketing achievements accumulated",
+    defaultValue: 0
+  },
+  Partner_count: {
+    type: Number,
+    label: "Total number of partner achievements accumulated",
+    defaultValue: 0
+  },
+  Practice_count: {
+    type: Number,
+    label: "Total number of practice achievements accumulated",
+    defaultValue: 0
+  },
+  Sales_count: {
+    type: Number,
+    label: "Total number of sales achievements accumulated",
+    defaultValue: 0
+  },
   Achievements: {
     type: [Object],
     optional: true

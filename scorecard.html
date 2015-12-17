@@ -20,10 +20,9 @@
 
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul class="nav navbar-nav navbar-left nav-tabs">
-          {{#if currentUser}}
+            <li><a href="/Scoreboard">View Scoreboard</a></li>
             <li><a href="/Participants">View Participants</a></li>
             <li><a href="/Achievements">View Achievements</a></li>
-          {{/if}}
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li class="nav navbar-nav">{{> loginButtons}}</li>
@@ -35,10 +34,59 @@
   <!-- {{> hello}} -->
 </body>
 
+<template name="scoreboard">
+  <center>
+  <table id="scoreboard" style="border-collapse:separate;border-spacing:20px;">
+  <thead><tr><th>Name</th><th>Points</th><th>Eligible</th><th>Trophies</th></tr></thead>
+  {{#each participant}}
+    <tr>
+      <td><a href="/Inspect/{{_id}}">{{FirstName}} {{LastName}}</a></td>
+      <td>{{Points}}</td>
+      <td>{{#if Eligible}}<img src="/images/Checked-24.png">{{/if}}</td>
+      <td>
+        {{#each Trophies}}
+          <img src="{{Image}}" data-toggle="tooltip" title="{{Tooltip}}" >
+        {{/each}}
+      </td>
+    </tr>
+  {{/each}}
 
-<template name="hello">
-  <button>Click Me</button>
-  <p>You've pressed the button {{counter}} times.</p>
+  </table>
+  </center>
+</template>
+
+<template name="inspect_template">
+  <h1> Participant Detail:</h1>
+  <table>
+  <tr><td>First Name:</td><td> {{participant.FirstName}}</td></tr>
+  <tr><td>Last Name:</td><td> {{participant.LastName}}</td></tr>
+  <tr><td>Eligible:</td><td> {{participant.Eligible}}</td></tr>
+  <tr><td>Points:</td><td>  {{participant.Points}}</td></tr>
+  <tr><td>Total Achievements:</td><td>{{participant.Achievement_count}}</td></tr>
+  <tr><td>Delivery Achievements:</td><td>{{participant.Achievement_count}}</td></tr>
+  <tr><td>Marketing Achievements:</td><td>{{participant.Delivery_count}}</td></tr>
+  <tr><td>Partner Achievements:</td><td>{{participant.Partner_count}}</td></tr>
+  <tr><td>Practice Achievements:</td><td>{{participant.Practice_count}}</td></tr>
+  <tr><td>Sales Achievements:</td><td>{{participant.Sales_count}}</td></tr>
+  </table>
+
+  <h2>Achievements:</h2>
+  
+  <table>
+  <thead><th>Description</th><th>Date</th><th>Validator</th><th>Achievement ID</th></thead>
+  {{#each participant.Achievements}}
+  <tr><td>{{Description}}</td><td>{{Date}}</td><td>{{Validator}}</td><td>{{Achievement_Id}}</td></tr>
+  {{/each}}
+  </table>
+
+  <h2>Trophies:</h2>
+  <table>
+  <thead><th>Name</th><th>Tooltip</th><th>Image</th></thead>
+  {{#each participant.Trophies}}
+  <tr><td>{{Name}}</td><td>{{Tooltip}}</td><td><img src="{{Image}}"></td></tr>
+  {{/each}}
+  </table>
+  
 </template>
 
 <template name="denied">
@@ -78,13 +126,6 @@
   </table>
   <input type="submit" value="Submit"/> 
   </form>
-</template>
-
-<template name="inspect_template">
-  Inspect
-  {{Name}}
-  {{eligible}}
-  End
 </template>
 
 <template name="insertParticipantForm">
