@@ -212,10 +212,17 @@ if (Meteor.isClient) {
            }
          }
          // Since we've already updated the record we have also counted the points for this achievement in our calculation
+         console.log(maxPoints);
          if (typeof maxPoints !== "undefined") {
-           if (achievementPoints < (maxPoints-achievementPoints)) {
+           console.log("---- achievementPoints maxPoints achievement.Points newPoints ----");
+           console.log(achievementPoints, maxPoints, achievement.Points, newPoints);
+           console.log("---------------------------------------");
+           if (achievementPoints <= maxPoints) {
+             console.log("Comparison succeeded");
              var newPoints = participant.Points + achievement.Points;
              Participants.update({_id: participant_id}, {$set: {Points: newPoints}});
+           } else {
+             console.log("Comparison failed");
            }
          } else {
              var newPoints = participant.Points + achievement.Points;
@@ -308,9 +315,9 @@ if (Meteor.isClient) {
 
 if (Meteor.isServer) {
   Meteor.startup(function () {
-    Roles.addUsersToRoles("8rY7ZNxw7K8Sh82ku", ['admin', 'validator'])
-    Roles.addUsersToRoles("irbYTMdhaLbgskFui", ['validator'])
-    Roles.addUsersToRoles("2D7iTy4wefohnAjWY", ['validator'])
+    //Roles.addUsersToRoles("8rY7ZNxw7K8Sh82ku", ['admin', 'validator']);
+    //Roles.addUsersToRoles("irbYTMdhaLbgskFui", ['validator']);
+    //Roles.addUsersToRoles("2D7iTy4wefohnAjWY", ['validator']);
     // code to run on server at startup
   });
 
