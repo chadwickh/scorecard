@@ -57,6 +57,16 @@ background:#eeeeee;
 color: graytext;
 }
 
+td
+{
+  padding:2px 15px 2px 15px;
+}
+th
+{
+  padding:2px 15px 2px 15px;
+}
+
+
 .many .dygraph-legend > span { display: none; }
 
 .many .dygraph-legend > span.highlight { display: inline; }

@@ -20,10 +20,12 @@ Participants.attachSchema( new SimpleSchema ({
     type: Number,
     label: "Points",
     min: 0,
+    defaultValue: 0
   },
   Eligible: {
     type: Boolean,
     label: "Met prerequisites for award",
+    defaultValue: false
   },
   Achievement_count: {
     type: Number,
@@ -115,6 +117,7 @@ Achievements.attachSchema (new SimpleSchema ({
   },
   MaxPoints: {
     type: Number,
-    label: "Maximum possible points from this achievement, in case of multiple attainment"
+    label: "Maximum possible points from this achievement, in case of multiple attainment",
+    optional: true
   }
 }));
