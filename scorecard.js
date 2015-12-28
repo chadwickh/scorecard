@@ -150,7 +150,7 @@ if (Meteor.isClient) {
  
   Template.modify_participanttemplate.rendered=function() {
     $('#my-datepicker').datepicker();
-    $('#achievement_table').DataTable();
+    $('#achievement_table').DataTable({"order": [[2, "asc"],[1, "asc"]]});
   }
 
   Template.modify_participanttemplate.events({
