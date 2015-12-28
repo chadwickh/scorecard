@@ -6,11 +6,6 @@ padding-top:  60px;
 padding-bottom: 40px;
 }
 
-td
-{
-padding: 5px;
-}
-
 .panel-body{
         height:200px;
 }
@@ -42,6 +37,7 @@ padding: 5px;
 	width: 90vw;
 	height: 90vh;
 }
+
 
 input[type="button"]:disabled
 {

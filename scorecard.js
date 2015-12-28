@@ -7,6 +7,7 @@ Meteor.isClient && Template.registerHelper('TabularTables', TabularTables);
 TabularTables.Participants = new Tabular.Table({
   name: "Participants",
   collection: Participants,
+  order: [[2, "asc"],[1, "asc"]],
   columns: [
     {data: "_id", title: "ID", render: function(val, type, doc) 
       { var link=val; 
@@ -30,6 +31,7 @@ TabularTables.Participants = new Tabular.Table({
 TabularTables.Achievements = new Tabular.Table({
   name: "Achievements",
   collection: Achievements,
+  order: [[0, "asc"],[1, "asc"]],
   columns: [
     {data: "Category", title: "Category"},
     {data: "Description", title: "Description"},
@@ -45,10 +47,10 @@ if (Meteor.isClient) {
   Meteor.subscribe("participants");
   
   Router.map(function() {
-    this.route('Home', { path: '/', template: 'scoreboard', data: {participant:  Participants.find({},{sort: {Eligible: -1, Points: -1, Achievement_count: -1, LastName: 1, FirstName: 1}})}});
-    this.route('Scoreboard', { path: '/Scoreboard', template: 'scoreboard', data: {participant:  Participants.find({},{sort: {Eligible: -1, Points: -1, Achievement_count: -1, LastName: 1, FirstName: 1}})}});
-    this.route('Participants', { path: '/Participants', template: 'participants_template', data: {participant:  Participants.find()}});
-    this.route('Achivements', { path: '/Achievements', template: 'achievements_template', data: {achievement:  Achievements.find()}});
+    this.route('Home', { path: '/', template: 'scoreboard', waitOn: function() { Meteor.subscribe('participants')}, data: {participant:  Participants.find({},{sort: {Eligible: -1, Points: -1, Achievement_count: -1, LastName: 1, FirstName: 1}})}});
+    this.route('Scoreboard', { path: '/Scoreboard', template: 'scoreboard', waitOn: function() { Meteor.subscribe('participants')}, data: {participant:  Participants.find({},{sort: {Eligible: -1, Points: -1, Achievement_count: -1, LastName: 1, FirstName: 1}})}});
+    this.route('Participants', { path: '/Participants', template: 'participants_template', waitOn: function() { Meteor.subscribe('participants')}, data: {participant:  Participants.find()}});
+    this.route('Achivements', { path: '/Achievements', template: 'achievements_template', waitOn: function() { Meteor.subscribe('achievements')}, data: {achievement:  Achievements.find()}});
     this.route('Inspect', { 
       path: '/Inspect/:_id', 
       template: 'inspect_template', 
@@ -305,6 +307,12 @@ if (Meteor.isClient) {
       if (typeof mostSales !== "undefined") {
         Participants.update({_id: mostSales._id},{$addToSet: {Trophies: {Name : "MostSales", Tooltip: "Most completed achievements in the sales category", Image: "/images/Sales_Performance-24.png"}}});
       }
+      //Trophy for most Technical achievements
+      var mostTechnical=Participants.findOne({Technical_count: {$gt: 0}},{sort: {Technical_count: -1, Points: -1}, limit: 1});
+      if (typeof mostTechnical !== "undefined") {
+        Participants.update({_id: mostTechnical._id},{$addToSet: {Trophies: {Name : "MostTechnical", Tooltip: "Most completed achievements in the technical category", Image: "/images/Globe_Bulb-24.png"}}});
+      }
+
 
       // Redirect back to the scoreboard after submit
       Router.go('/');     
@@ -315,8 +323,13 @@ if (Meteor.isClient) {
 
 if (Meteor.isServer) {
   Meteor.startup(function () {
-    Roles.addUsersToRoles("MeisbzAB9dwqmrT9M", ['admin', 'validator']);
-    //Roles.addUsersToRoles("irbYTMdhaLbgskFui", ['validator']);
+    Roles.addUsersToRoles("eYep3zXbpGBu4xhqv", ['admin', 'validator']);
+    Roles.addUsersToRoles("rxemrD36Y6ANRHjQS", ['validator']);
+    Roles.addUsersToRoles("gvmiAwtdsa8JqrehW", ['validator']);
+    Roles.addUsersToRoles("78KB3ZaHJ3aF8uNGt", ['validator']);
+    Roles.addUsersToRoles("yXfdWvnx7sgc9QG5G", ['validator']);
+    Roles.addUsersToRoles("kncQJHQAMwhZpG4mR", ['validator']);
+    Roles.addUsersToRoles("6bgJzPKStDpLEQMyc", ['validator']);
     //Roles.addUsersToRoles("2D7iTy4wefohnAjWY", ['validator']);
     // code to run on server at startup
   });
@@ -332,6 +345,7 @@ if (Meteor.isServer) {
       Participants.update({"Trophies.Name": "MostPartner"}, {$pull: {Trophies: {"Name" : "MostPartner"}}})
       Participants.update({"Trophies.Name": "MostPractice"}, {$pull: {Trophies: {"Name" : "MostPractice"}}})
       Participants.update({"Trophies.Name": "MostSales"}, {$pull: {Trophies: {"Name" : "MostSales"}}})
+      Participants.update({"Trophies.Name": "MostTechnical"}, {$pull: {Trophies: {"Name" : "MostTechnical"}}})
     }
   });
       
