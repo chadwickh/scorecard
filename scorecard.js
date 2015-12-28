@@ -176,7 +176,7 @@ if (Meteor.isClient) {
 
       if (typeof participant.Achievements === 'undefined') {
          //console.log('First Achievement!');
-         Participants.update({_id : participant_id},{$push :{Achievements: {Description : description, Validator: Meteor.userId(), 'Date' : date, Achievement_Id: achievement_id}}});
+         Participants.update({_id : participant_id},{$push :{Achievements: {Description : description, Validator: Meteor.userId(), Validator_Email: Meteor.user().emails[0].address, 'Date' : date, Achievement_Id: achievement_id}}});
          Participants.update({_id: participant_id}, {$set: {Points: achievement.Points}});
       } else {
          //console.log("Existing Achievements!");
@@ -195,7 +195,7 @@ if (Meteor.isClient) {
          //   2) It sets the value in the categories associative array to 1.  Once we're done with this loop we'll walk the 
          //      hash and set eligible to 1 if all entries are set to 1
          // Have to insert this before walking the Achievements array, or it doesn't get picked up
-         Participants.update({_id : participant_id},{$push :{Achievements: {Description : description, Validator: Meteor.userId(), 'Date' : date, Achievement_Id: achievement_id}}});
+         Participants.update({_id : participant_id},{$push :{Achievements: {Description : description, Validator: Meteor.userId(), Validator_Email: Meteor.user().emails[0].address,  'Date' : date, Achievement_Id: achievement_id}}});
          // And let's update our variable with the new data
          var participant=Participants.findOne({_id : participant_id});
          var maxPoints = achievement.MaxPoints;
@@ -237,7 +237,7 @@ if (Meteor.isClient) {
              eligibleCount=eligibleCount+categories[key];
            }
          }
-         //console.log("categoryCount: ",categoryCount," eligibleCount:  ",eligibleCount);
+         console.log("categoryCount: ",categoryCount," eligibleCount:  ",eligibleCount);
          if (categoryCount === eligibleCount) {
            Participants.update({_id : participant_id},{$set: {Eligible: true}});
          }
@@ -315,7 +315,7 @@ if (Meteor.isClient) {
 
 if (Meteor.isServer) {
   Meteor.startup(function () {
-    //Roles.addUsersToRoles("8rY7ZNxw7K8Sh82ku", ['admin', 'validator']);
+    Roles.addUsersToRoles("MeisbzAB9dwqmrT9M", ['admin', 'validator']);
     //Roles.addUsersToRoles("irbYTMdhaLbgskFui", ['validator']);
     //Roles.addUsersToRoles("2D7iTy4wefohnAjWY", ['validator']);
     // code to run on server at startup

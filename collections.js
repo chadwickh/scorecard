@@ -57,6 +57,11 @@ Participants.attachSchema( new SimpleSchema ({
     label: "Total number of sales achievements accumulated",
     defaultValue: 0
   },
+  Technical_count: {
+    type: Number,
+    label: "Total number of technical achievements accumulated",
+    defaultValue: 0
+  },
   Achievements: {
     type: [Object],
     optional: true
@@ -74,6 +79,11 @@ Participants.attachSchema( new SimpleSchema ({
   "Achievements.$.Validator": {
     type:  String,
     label:  "Person validating award",
+    optional: true
+  },
+  "Achievements.$.Validator_Email": {
+    type:  String,
+    label: "Email of person validating award",
     optional: true
   },
   "Achievements.$.Achievement_Id":  {

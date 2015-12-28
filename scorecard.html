@@ -4,34 +4,28 @@
 
 <body>
   <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="/">
-          <img alt="Brand" src="/lumenate-logo-30.png">
-          <!-- Brand -->
-        </a>
-      </div>
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <a class="navbar-brand" href="/"><img src="/lumenate-logo-30.png"></a>
 
-      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav navbar-left nav-tabs">
-            <li><a href="/Scoreboard">View Scoreboard</a></li>
-            <li><a href="/Participants">View Participants</a></li>
-            <li><a href="/Achievements">View Achievements</a></li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-          <li class="nav navbar-nav">{{> loginButtons}}</li>
-        </ul>
-      </div>
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav navbar-left">
+        <li><a href="/Scoreboard">View Scoreboard</a></li>
+        <li><a href="/Participants">View Participants</a></li>
+        <li><a href="/Achievements">View Achievements</a></li>
+        <li><a href="mailto:chad.hodges@lumenate.com">Support/Feedback</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>{{> loginButtons}}</li>
+      </ul>
     </div>
   </nav>
 
-  <!-- {{> hello}} -->
 </body>
 
 <template name="scoreboard">
@@ -64,11 +58,12 @@
   <tr><td>Eligible:</td><td> {{participant.Eligible}}</td></tr>
   <tr><td>Points:</td><td>  {{participant.Points}}</td></tr>
   <tr><td>Total Achievements:</td><td>{{participant.Achievement_count}}</td></tr>
-  <tr><td>Delivery Achievements:</td><td>{{participant.Achievement_count}}</td></tr>
-  <tr><td>Marketing Achievements:</td><td>{{participant.Delivery_count}}</td></tr>
+  <tr><td>Delivery Achievements:</td><td>{{participant.Delivery_count}}</td></tr>
+  <tr><td>Marketing Achievements:</td><td>{{participant.Marketing_count}}</td></tr>
   <tr><td>Partner Achievements:</td><td>{{participant.Partner_count}}</td></tr>
   <tr><td>Practice Achievements:</td><td>{{participant.Practice_count}}</td></tr>
   <tr><td>Sales Achievements:</td><td>{{participant.Sales_count}}</td></tr>
+  <tr><td>Technical Achievements:</td><td>{{participant.Technical_count}}</td></tr>
   </table>
 
   <h2>Achievements:</h2>
@@ -76,7 +71,7 @@
   <table>
   <thead><th>Description</th><th>Date</th><th>Validator</th><th>Achievement ID</th></thead>
   {{#each participant.Achievements}}
-  <tr><td>{{Description}}</td><td>{{Date}}</td><td>{{Validator}}</td><td>{{Achievement_Id}}</td></tr>
+  <tr><td>{{Description}}</td><td>{{Date}}</td><td>{{Validator_Email}}</td><td>{{Achievement_Id}}</td></tr>
   {{/each}}
   </table>
 
