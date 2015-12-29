@@ -152,11 +152,19 @@ if (Meteor.isClient) {
     $('#my-datepicker').datepicker();
     $('#achievement_table').DataTable({"order": [[2, "asc"],[1, "asc"]]});
   }
+  
+  Template.modify_participanttemplate.onRendered(function() {
+    $('.achievement_form').validate({
+      rules: {
+        achievement: {required: true}
+      }
+    });
+  });
 
   Template.modify_participanttemplate.events({
     "submit .modify-form": function (event) {
       event.preventDefault();
-
+      
       var description=event.target.description.value;
       var date=event.target.date.value;
       var achievement_id=event.target.achievement.value;

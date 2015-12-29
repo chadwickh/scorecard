@@ -107,16 +107,16 @@
 
 <template name="modify_participanttemplate">
   <h1>Adding achievement for {{participant.FirstName}} {{participant.LastName}}</h1>
-  <form class="modify-form">
+  <form class="modify-form" id="achievement_form">
     <input type="hidden" name="participantId" value={{participant._id}}>
-    Description: <input type="text" name="description" class="form-control"  placeholder="Please enter a brief description for this achievement"/> <br>
-    Date: <input type="text" name="date" class="form-control" id="my-datepicker"/><br>
+    Description: <input type="text" name="description" class="form-control"  placeholder="Please enter a brief description for this achievement" required /> <br>
+    Date: <input type="text" name="date" class="form-control" id="my-datepicker" required /><br>
   <table id="achievement_table" class="achievement_table" name="achievement_table">
   <thead> <tr><th></th><th>Description</th><th>Category</th><th>Points</th><th>Max Points</th></tr> </thead>
   <tbody>
   {{#each achievements}}
     <tr>
-      <td> <input type="radio" name="achievement" value={{_id}}> </td>
+      <td> <input type="radio" name="achievement" value={{_id}} required /> </td>
       <td> {{Description}} </td>
       <td> {{Category}} </td>
       <td> {{Points}} </td>
