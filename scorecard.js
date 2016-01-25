@@ -391,7 +391,7 @@ if (Meteor.isServer) {
       Participants.update({"Trophies.Name": "MostTechnical"}, {$pull: {Trophies: {"Name" : "MostTechnical"}}})
     },
     emailOnAchievementSubmit:  function(participantId) {
-      var submitter=Participants.find({_id: participantId});
+      var submitter=Participants.findOne({_id: participantId});
 
       var to=submitter.ApproverEmail;
       var cc="chad.hodges@lumenate.com";
