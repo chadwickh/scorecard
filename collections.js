@@ -16,6 +16,14 @@ Participants.attachSchema( new SimpleSchema ({
     min: 1,
     max: 20
     },
+  Email: {
+    type: String,
+    regEx: SimpleSchema.RegEx.Email
+  },
+  ApproverEmail: {
+    type: String,
+    regEx: SimpleSchema.RegEx.Email
+  },
   Points: {
     type: Number,
     label: "Points",
@@ -75,6 +83,11 @@ Participants.attachSchema( new SimpleSchema ({
     type:  Date,
     label: "Date of achievement",
     optional: true
+  },
+  "Achievements.$.Valid":  {
+    type:  Boolean,
+    label: "This achievement has been approved by a member of the Office of the CTO",
+    defaultValue: false
   },
   "Achievements.$.Validator": {
     type:  String,

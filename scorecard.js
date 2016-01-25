@@ -21,6 +21,21 @@ TabularTables.Participants = new Tabular.Table({
         return link;
       }
     },
+    {data: "Email", title: "Email", render: function(val, type, doc)
+      { var link=val;
+        if (Meteor.user()) {loggedInEmail=Meteor.user().emails[0].address;
+          //console.log("Comparing these");
+          //console.log(link);
+          //console.log(loggedInEmail);
+          if (link === loggedInEmail) {
+            var me=Participants.findOne({Email: loggedInEmail});
+            //console.log(me._id);
+            link='<a href="/Modify/Participant/'+me._id+'">'+link+'</a>';
+          }
+        }
+        return link;
+      }
+    },
     {data: "FirstName", title: "First Name"},
     {data: "LastName", title: "Last Name"},
     {data: "Points", title: "Points"},
@@ -42,6 +57,7 @@ TabularTables.Achievements = new Tabular.Table({
 
 
 if (Meteor.isClient) {
+
 
   Meteor.subscribe("achievements");
   Meteor.subscribe("participants");
@@ -121,7 +137,23 @@ if (Meteor.isClient) {
         }
       },
       onBeforeAction: function() {
-        if (!Meteor.user() || !Roles.userIsInRole(Meteor.user(),['validator'])) {
+
+        if (Meteor.user()) {
+          loggedInEmail=Meteor.user().emails[0].address;
+          var me=Participants.findOne({Email: loggedInEmail});
+          //console.log(me._id);
+          //console.log(this.params_id);
+          //console.log(_id);
+          //console.log(this.params._id);
+  
+          //if (me._id === this.params._id) {
+            //console.log("Should work");
+          //} else {
+            //console.log("Something subtle");
+          //}
+        }
+   
+        if ((!Meteor.user()) || (!Roles.userIsInRole(Meteor.user(),['validator']) && !(me._id === this.params._id))) {
           this.render('denied');
         } else {
           this.next();
@@ -186,7 +218,7 @@ if (Meteor.isClient) {
 
       if (typeof participant.Achievements === 'undefined') {
          //console.log('First Achievement!');
-         Participants.update({_id : participant_id},{$push :{Achievements: {Description : description, Validator: Meteor.userId(), Validator_Email: Meteor.user().emails[0].address, 'Date' : date, Achievement_Id: achievement_id}}});
+         Participants.update({_id : participant_id},{$push :{Achievements: {Description : description, 'Date' : date, Achievement_Id: achievement_id}}});
          Participants.update({_id: participant_id}, {$set: {Points: achievement.Points}});
       } else {
          //console.log("Existing Achievements!");
@@ -205,7 +237,7 @@ if (Meteor.isClient) {
          //   2) It sets the value in the categories associative array to 1.  Once we're done with this loop we'll walk the 
          //      hash and set eligible to 1 if all entries are set to 1
          // Have to insert this before walking the Achievements array, or it doesn't get picked up
-         Participants.update({_id : participant_id},{$push :{Achievements: {Description : description, Validator: Meteor.userId(), Validator_Email: Meteor.user().emails[0].address,  'Date' : date, Achievement_Id: achievement_id}}});
+         Participants.update({_id : participant_id},{$push :{Achievements: {Description : description, 'Date' : date, Achievement_Id: achievement_id}}});
          // And let's update our variable with the new data
          var participant=Participants.findOne({_id : participant_id});
          var maxPoints = achievement.MaxPoints;
@@ -321,6 +353,8 @@ if (Meteor.isClient) {
         Participants.update({_id: mostTechnical._id},{$addToSet: {Trophies: {Name : "MostTechnical", Tooltip: "Most completed achievements in the technical category", Image: "/images/Globe_Bulb-24.png"}}});
       }
 
+      // Send email notification
+      Meteor.call("emailOnAchievementSubmit",participant_id);
 
       // Redirect back to the scoreboard after submit
       Router.go('/');     
@@ -331,15 +365,16 @@ if (Meteor.isClient) {
 
 if (Meteor.isServer) {
   Meteor.startup(function () {
-    Roles.addUsersToRoles("eYep3zXbpGBu4xhqv", ['admin', 'validator']);
-    Roles.addUsersToRoles("rxemrD36Y6ANRHjQS", ['validator']);
-    Roles.addUsersToRoles("gvmiAwtdsa8JqrehW", ['validator']);
-    Roles.addUsersToRoles("78KB3ZaHJ3aF8uNGt", ['validator']);
-    Roles.addUsersToRoles("yXfdWvnx7sgc9QG5G", ['validator']);
-    Roles.addUsersToRoles("kncQJHQAMwhZpG4mR", ['validator']);
-    Roles.addUsersToRoles("6bgJzPKStDpLEQMyc", ['validator']);
+    //Roles.addUsersToRoles("eYep3zXbpGBu4xhqv", ['admin', 'validator']);
+    //Roles.addUsersToRoles("rxemrD36Y6ANRHjQS", ['validator']);
+    //Roles.addUsersToRoles("gvmiAwtdsa8JqrehW", ['validator']);
+    //Roles.addUsersToRoles("78KB3ZaHJ3aF8uNGt", ['validator']);
+    //Roles.addUsersToRoles("yXfdWvnx7sgc9QG5G", ['validator']);
+    //Roles.addUsersToRoles("kncQJHQAMwhZpG4mR", ['validator']);
+    //Roles.addUsersToRoles("6bgJzPKStDpLEQMyc", ['validator']);
     //Roles.addUsersToRoles("2D7iTy4wefohnAjWY", ['validator']);
     // code to run on server at startup
+    process.env.MAIL_URL = 'smtp://localhost:25/';
   });
 
   Meteor.methods({
@@ -354,6 +389,23 @@ if (Meteor.isServer) {
       Participants.update({"Trophies.Name": "MostPractice"}, {$pull: {Trophies: {"Name" : "MostPractice"}}})
       Participants.update({"Trophies.Name": "MostSales"}, {$pull: {Trophies: {"Name" : "MostSales"}}})
       Participants.update({"Trophies.Name": "MostTechnical"}, {$pull: {Trophies: {"Name" : "MostTechnical"}}})
+    },
+    emailOnAchievementSubmit:  function(participantId) {
+      var submitter=Participants.find({_id: participantId});
+
+      var to=submitter.ApproverEmail;
+      var cc="chad.hodges@lumenate.com";
+      var from="chad.hodges@lumenate.com";
+      var subject="New scorecard achievement submission from "+submitter.Email;
+      var text=submitter.Email+" has submitted a new achievement.  You may approve this achievement at http://scorecard.lumenate.biz/Autoform/Participant/"+submitter._id;
+ 
+      Email.send({
+        to: to,
+        cc: cc,
+        from: from,
+        subject: subject,
+        text: text
+      });
     }
   });
       
@@ -382,7 +434,12 @@ if (Meteor.isServer) {
   
   Participants.allow({
     update:  function (userId, doc) {
-      return Roles.userIsInRole(userId,['validator']);
+      if (Meteor.user()) {
+        loggedInEmail=Meteor.user().emails[0].address;
+        //console.log(loggedInEmail);
+        //console.log(doc.Email);
+      }
+      return ((Roles.userIsInRole(userId,['validator'])) || (doc.Email === loggedInEmail));
     },
   
     insert:  function (userId, doc) {
