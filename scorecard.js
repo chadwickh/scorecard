@@ -179,7 +179,20 @@ if (Meteor.isClient) {
     });
   });
 
- 
+  Template.registerHelper( 'getId', () => {
+    console.log("In getId helper...");
+    if (Meteor.user()) {
+      console.log("Inside of meteor.user section...");
+      var loggedInEmail=Meteor.user().emails[0].address;
+      console.log(loggedInEmail);
+      var me=Participants.findOne({Email: loggedInEmail});
+      console.log(me);
+      return me._id;
+    } else {
+      return "No user";
+    }
+  });
+
   Template.modify_participanttemplate.rendered=function() {
     $('#my-datepicker').datepicker();
     $('#achievement_table').DataTable({"order": [[2, "asc"],[1, "asc"]]});

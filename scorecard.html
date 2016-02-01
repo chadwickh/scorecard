@@ -23,6 +23,9 @@
             <li><a href="/Scoreboard">View Scoreboard</a></li>
             <li><a href="/Participants">View Participants</a></li>
             <li><a href="/Achievements">View Achievements</a></li>
+            {{#if currentUser}}
+              <li><a href="/Modify/Participant/{{getId}}">Add an Achievement</a></li>
+            {{/if}}
         </ul>
         <ul class="nav navbar-nav navbar-right">
           <li class="nav navbar-nav">{{> loginButtons}}</li>
