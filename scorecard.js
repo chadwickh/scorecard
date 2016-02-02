@@ -189,7 +189,7 @@ if (Meteor.isClient) {
       console.log(me);
       return me._id;
     } else {
-      return "No user";
+      return false;
     }
   });
 
