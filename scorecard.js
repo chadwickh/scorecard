@@ -212,8 +212,9 @@ if (Meteor.isClient) {
       
       var description=event.target.description.value;
       var date=event.target.date.value;
-      var achievement_id=event.target.achievement.value;
+      //var achievement_id=event.target.achievement.value;
       var participant_id=event.target.participantId.value;
+      var achievement_id=$("input:radio[name=achievement]:checked").val();
 
       //console.log(event);
       //console.log("Output:" , description, date, achievement_id, participant_id);
